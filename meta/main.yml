@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: ac
+  description: Clones a Node app and installs dependencies
+  company: ART+COM
+  license: MIT
+
+  min_ansible_version: 2.9
+  platforms:
+  - name: Windows
+    versions:
+      - 10
+  galaxy_tags: []
+dependencies: []
+  - src: git@github.com:artcom/ansible-role-check-required-variables.git
+    scm: git
+    version: "v1.0.0"
+    name: check-required-variables

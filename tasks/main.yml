@@ -1,0 +1,67 @@
+---
+- name: check credentials
+  fail:
+    msg: 'variable {{ required_var.key }} not defined'
+  loop: "{{ required_vars|dict2items }}"
+  vars:
+    required_vars:
+      deployment_user: "{{ deployment_user }}"
+      deployment_password: "{{ deployment_password }}"
+  loop_control:
+    loop_var: required_var
+  when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
+
+- name: install git
+  win_chocolatey:
+    name: git
+    params: /GitOnlyOnPath
+  notify: reboot
+
+- name: install node
+  win_chocolatey:
+    name: nodejs
+    version: "{{ node_version }}"
+  notify: reboot
+
+- name: flush handlers
+  meta: flush_handlers
+
+- name: check node process is running
+  win_shell: Get-Process node
+  register: node_process_running
+  ignore_errors: true
+  no_log: true
+  changed_when: node_process_running.rc == 0
+
+- name: stop running node processes
+  win_shell: Stop-Process -Name node
+  when: node_process_running.rc == 0
+
+- name: remove old version
+  win_file:
+    path: "{{ node_app_path }}"
+    state: absent
+
+- name: clone source code from private repository
+  win_command: "git clone \
+    --branch {{ node_app_branch }} \
+    {{ node_app_repo.url | urlsplit('scheme') }}://\
+    {{ deployment_user|urlencode }}:{{ deployment_password|urlencode }}@\
+    {{ node_app_repo.url | urlsplit('hostname') }}{{ node_app_repo.url | urlsplit('path') }} \
+    {{ node_app_path }}"
+  when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
+  notify:
+    - reboot
+
+- name: remove credentials from origin
+  raw: git --git-dir={{ node_app_path }}/.git remote set-url origin {{ node_app_repo.url }}
+  when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
+
+- name: clone source code from public repository
+  win_command: git clone --branch {{ node_app_branch }} {{ node_app_repo.url }} {{ node_app_path }}
+  when: '"private" not in node_app_repo.keys() or not node_app_repo.private | bool'
+  notify:
+    - reboot
+
+- name: install dependencies
+  win_shell: cd {{ node_app_path }}; npm install --production
