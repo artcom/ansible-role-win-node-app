@@ -27,7 +27,8 @@ deployment_password: "string"
 ```
 
 ## Dependencies
-None.
+* [check-required-variables](https://github.com/artcom/ansible-role-check-required-variables)
+* [win-reboot-handler](https://github.com/artcom/ansible-role-win-reboot-handler)
 
 # Example Playbook
 ```yaml

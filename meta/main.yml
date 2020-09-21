@@ -19,4 +19,4 @@ dependencies:
   - src: git@gitlab.artcom.de:ansible-roles/win-reboot-handler.git
     scm: git
     name: reboot-handler
-    version: 1.0.0
+    version: "1.0.0"
