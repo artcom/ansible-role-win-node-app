@@ -1,0 +1,6 @@
+- name: check variables
+  fail:
+    msg: 'variable {{ required_var.key }} not defined'
+  loop: "{{ required_vars|dict2items }}"
+  loop_control:
+    loop_var: required_var

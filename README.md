@@ -10,6 +10,9 @@ Available variables are listed below, along with default values `(see defaults/m
 node_version: null
 node_app_path: null
 node_app_repo: null
+use_node_gyp: false
+python2_version: null
+visual_cpp_build_tools_version: null
 node_app_branch: "master"
 ```
 Required variables (role will fail if the variables are not set):
@@ -24,6 +27,11 @@ Required variables for a private repo (role will fail if the variables are not s
 ```yaml
 deployment_user: "string"
 deployment_password: "string"
+```
+Required variables when using node_gyp (role will fail if the variables are not set):
+```yaml
+python2_version: "string"
+visual_cpp_build_tools_version: "string"
 ```
 
 ## Dependencies

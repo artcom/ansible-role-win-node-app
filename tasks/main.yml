@@ -1,15 +1,19 @@
 ---
 - name: check credentials
-  fail:
-    msg: 'variable {{ required_var.key }} not defined'
-  loop: "{{ required_vars|dict2items }}"
+  import_tasks: check_variables.yml
   vars:
     required_vars:
       deployment_user: "{{ deployment_user }}"
       deployment_password: "{{ deployment_password }}"
-  loop_control:
-    loop_var: required_var
   when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
+
+- name: check node_gyp variables
+  import_tasks: check_variables.yml
+  vars:
+    required_vars:
+      python2_version: "{{ python2_version }}"
+      visual_cpp_build_tools_version: "{{ visual_cpp_build_tools_version }}"
+  when: use_node_gyp | bool
 
 - name: install git
   win_chocolatey:
@@ -62,6 +66,23 @@
   when: '"private" not in node_app_repo.keys() or not node_app_repo.private | bool'
   notify:
     - reboot
+
+- name: install python2
+  win_chocolatey:
+    name: python2
+    version: "{{ python2_version }}"
+    state: present
+  when: use_node_gyp | bool
+
+- name: install visual cpp build tools
+  win_chocolatey:
+    name: visualcppbuildtools
+    version: "{{ visual_cpp_build_tools_version }}"
+  when: use_node_gyp | bool
+
+- name: configure node to use visual cpp build tools
+  raw: npm config set msvs_version 2015 --global
+  when: use_node_gyp | bool
 
 - name: install dependencies
   win_shell: cd {{ node_app_path }}; npm install --production
