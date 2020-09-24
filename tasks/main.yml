@@ -31,7 +31,7 @@
   meta: flush_handlers
 
 - name: check node process is running
-  win_shell: Get-Process node
+  win_shell: Get-Process -Name node
   register: node_process_running
   ignore_errors: true
   no_log: true
