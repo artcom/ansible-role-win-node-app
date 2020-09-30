@@ -1,6 +1,9 @@
 # Node App
 Ansible role to clone a Node app and install its dependencies on a Windows 10 machine.
 
+## Description
+This role will clone a node app from a git repository over https, install Node and the Node app dependencies. Credentials can be passed to the role to install from a private repository. Optionally Node gyp dependencies will be installed.
+
 ## Requirements
 This role requires a reboot handler.
 
