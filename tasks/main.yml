@@ -1,6 +1,6 @@
 ---
 - name: check credentials
-  include_tasks: check_variables.yml
+  ansible_builtin.include_tasks: check_variables.yml
   vars:
     required_vars:
       deployment_user: "{{ deployment_user }}"
@@ -8,7 +8,7 @@
   when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
 
 - name: check node_gyp variables
-  include_tasks: check_variables.yml
+  ansible_builtin.include_tasks: check_variables.yml
   vars:
     required_vars:
       python2_version: "{{ python2_version }}"
@@ -16,19 +16,19 @@
   when: use_node_gyp | bool
 
 - name: install git
-  win_chocolatey:
+  chocolatey.chocolatey.win_chocolatey:
     name: git
     params: /GitOnlyOnPath
   notify: reboot
 
 - name: install node
-  win_chocolatey:
+  chocolatey.chocolatey.win_chocolatey:
     name: nodejs
     version: "{{ node_version }}"
   notify: reboot
 
 - name: flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: check node app path
   ansible.windows.win_stat:
@@ -46,24 +46,24 @@
     install_app: "{{ not (node_app_path_info.stat.exists | bool) or git_tag.stdout_lines[0] != node_app_tag }}"
 
 - name: check node process is running
-  win_shell: Get-Process -Name node
+  ansible.windows.win_shell: Get-Process -Name node
   register: node_process_running
   ignore_errors: true
   no_log: true
   changed_when: node_process_running.rc == 0
 
 - name: stop running node processes
-  win_shell: Stop-Process -Name node
+  ansible.windows.win_shell: Stop-Process -Name node
   when: node_process_running.rc == 0 and install_app | bool
 
 - name: remove old version
-  win_file:
+  ansible.windows.win_file:
     path: "{{ node_app_path }}"
     state: absent
   when: install_app | bool
 
 - name: clone source code from private repository
-  win_command: "git clone \
+  ansible.windows.win_command: "git clone \
     --branch {{ node_app_tag }} \
     {{ node_app_repo.url | urlsplit('scheme') }}://\
     {{ deployment_user|urlencode }}:{{ deployment_password|urlencode }}@\
@@ -74,32 +74,32 @@
     - reboot
 
 - name: remove credentials from origin
-  raw: git --git-dir={{ node_app_path }}/.git remote set-url origin {{ node_app_repo.url }}
+  ansible.builtin.raw: git --git-dir={{ node_app_path }}/.git remote set-url origin {{ node_app_repo.url }}
   when: 'install_app | bool and "private" in node_app_repo.keys() and node_app_repo.private | bool'
 
 - name: clone source code from public repository
-  win_command: git clone --branch {{ node_app_tag }} {{ node_app_repo.url }} {{ node_app_path }}
+  ansible.windows.win_command: git clone --branch {{ node_app_tag }} {{ node_app_repo.url }} {{ node_app_path }}
   when: 'install_app | bool and ("private" not in node_app_repo.keys() or not node_app_repo.private | bool)'
   notify:
     - reboot
 
 - name: install python2
-  win_chocolatey:
+  chocolatey.chocolatey.win_chocolatey:
     name: python2
     version: "{{ python2_version }}"
     state: present
   when: use_node_gyp | bool
 
 - name: install visual cpp build tools
-  win_chocolatey:
+  chocolatey.chocolatey.win_chocolatey:
     name: visualcppbuildtools
     version: "{{ visual_cpp_build_tools_version }}"
   when: use_node_gyp | bool
 
 - name: configure node to use visual cpp build tools
-  raw: npm config set msvs_version 2015 --global
+  ansible.builtin.raw: npm config set msvs_version 2015 --global
   when: use_node_gyp | bool
 
 - name: install dependencies
-  win_shell: cd {{ node_app_path }}; npm install --production
+  ansible.windows.win_shell: cd {{ node_app_path }}; npm install --production
   when: install_app | bool
