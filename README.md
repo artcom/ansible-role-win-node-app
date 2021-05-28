@@ -13,10 +13,10 @@ Available variables are listed below, along with default values `(see defaults/m
 node_version: null
 node_app_path: null
 node_app_repo: null
+node_app_tag: null
 use_node_gyp: false
 python2_version: null
 visual_cpp_build_tools_version: null
-node_app_branch: "master"
 ```
 Required variables (role will fail if the variables are not set):
 ```yaml
@@ -25,6 +25,7 @@ node_app_path: "string"
 node_app_repo:
   url: "string"
   private: "boolean"
+node_app_tag: "string"
 ```
 Required variables for a private repo (role will fail if the variables are not set):
 ```yaml
@@ -49,13 +50,14 @@ visual_cpp_build_tools_version: "string"
       win_reboot:
 
   tasks:
-    - import_role:
+    - ansible.builtin.include_role:
         name: win-node-app
       vars:
         node_version: "14.4.0"
         node_app_path: "{{ ansible_user_dir }}/node_app_name"
         node_app_repo:
           url: "https://github.com/username/node_app_name.git"
+        node_app_tag: "1.0.0"
 ```
 
 ## License

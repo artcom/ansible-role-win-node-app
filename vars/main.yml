@@ -3,4 +3,5 @@ required_vars:
   node_version: "{{ node_version }}"
   node_app_path: "{{ node_app_path }}"
   node_app_repo: "{{ node_app_repo }}"
+  node_app_tag: "{{ node_app_tag }}"
   node_app_repo_url: "{{ node_app_repo.url }}"
