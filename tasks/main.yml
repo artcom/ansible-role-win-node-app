@@ -33,16 +33,17 @@
 - name: check node app path
   ansible.windows.win_stat:
     path: "{{ node_app_path }}"
-  register: node_app_path
+  register: node_app_path_info
 
 - name: check app version
-  ansible.windows.win_command: "git --git-dir {{ node_app_path }}.git --work-tree {{ node_app_path }} describe"
+  ansible.windows.win_command: "git --git-dir {{ node_app_path }}\\.git --work-tree {{ node_app_path }} describe"
   register: git_tag
-  when: node_app_path.stat.exists
+  when: node_app_path_info.stat.exists
+  changed_when: git_tag.stdout_lines[0] != node_app_tag
 
 - name: set install node app flag
   ansible.builtin.set_fact:
-    install_app: "{{ !node_app_path.stat.exists or git_tag.stdout != node_app_tag }}"
+    install_app: "{{ not (node_app_path_info.stat.exists | bool) or git_tag.stdout_lines[0] != node_app_tag }}"
 
 - name: check node process is running
   win_shell: Get-Process -Name node
@@ -77,8 +78,8 @@
   when: 'install_app | bool and "private" in node_app_repo.keys() and node_app_repo.private | bool'
 
 - name: clone source code from public repository
-  win_command: git clone --branch {{ node_app_branch }} {{ node_app_repo.url }} {{ node_app_path }}
-  when: 'install_app | bool and "private" not in node_app_repo.keys() or not node_app_repo.private | bool'
+  win_command: git clone --branch {{ node_app_tag }} {{ node_app_repo.url }} {{ node_app_path }}
+  when: 'install_app | bool and ("private" not in node_app_repo.keys() or not node_app_repo.private | bool)'
   notify:
     - reboot
 
