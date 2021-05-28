@@ -1,6 +1,6 @@
 ---
 - name: check credentials
-  ansible_builtin.include_tasks: check_variables.yml
+  ansible.builtin.include_tasks: check_variables.yml
   vars:
     required_vars:
       deployment_user: "{{ deployment_user }}"
@@ -8,7 +8,7 @@
   when: '"private" in node_app_repo.keys() and node_app_repo.private | bool'
 
 - name: check node_gyp variables
-  ansible_builtin.include_tasks: check_variables.yml
+  ansible.builtin.include_tasks: check_variables.yml
   vars:
     required_vars:
       python2_version: "{{ python2_version }}"
