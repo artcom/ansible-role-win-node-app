@@ -5,7 +5,11 @@ Ansible role to clone a Node app and install its dependencies on a Windows 10 ma
 This role will clone a node app from a git repository over https, install Node and the Node app dependencies. Credentials can be passed to the role to install from a private repository. Optionally Node gyp dependencies will be installed.
 
 ## Requirements
-This role requires a reboot handler.
+This role requires a reboot handler:
+```yaml
+- name: reboot
+  ansible.windows.win_reboot:
+```
 
 ## Role Variables
 Available variables are listed below, along with default values `(see defaults/main.yml)`:
@@ -45,9 +49,10 @@ visual_cpp_build_tools_version: "string"
 ```yaml
 - name: install node app
   hosts: all
+
   handlers:
     - name: reboot
-      win_reboot:
+      ansible.windows.win_reboot:
 
   tasks:
     - ansible.builtin.include_role:
