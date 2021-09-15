@@ -53,7 +53,7 @@
   changed_when: app_process_running.rc == 0
 
 - name: stop running app processes
-  ansible.windows.win_shell: "Stop-Process -Force -Name {{ node_app_process }}"
+  ansible.windows.win_shell: "Stop-Process -Force -Name {{ node_app_process }}; [void]"
   when: app_process_running.rc == 0 and install_app | bool
 
 - name: remove old version
