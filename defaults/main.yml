@@ -3,6 +3,7 @@ node_version: null
 node_app_path: null
 node_app_repo: null
 node_app_tag: null
+node_app_process: node
 use_node_gyp: false
 python2_version: null
 visual_cpp_build_tools_version: null
