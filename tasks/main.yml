@@ -55,7 +55,7 @@
 
 - name: stop running watchdog processes
   ansible.windows.win_shell: Stop-Process -Force -Name watchdog; [void]
-  when: watchdog_process_running.rc == 0 and install_app | bool and node_watchdog | bool
+  when: install_app | bool and watchdog_process_running.rc == 0 and node_watchdog | bool
 
 - name: check node process is running
   ansible.windows.win_shell: Get-Process -Name node
@@ -67,7 +67,7 @@
 
 - name: stop running node processes
   ansible.windows.win_shell: Stop-Process -Force -Name node; [void]
-  when: node_process_running.rc == 0 and install_app | bool
+  when: install_app | bool and node_process_running.rc == 0
 
 - name: remove old version
   ansible.windows.win_file:
