@@ -45,16 +45,29 @@
   ansible.builtin.set_fact:
     install_app: "{{ not (node_app_path_info.stat.exists | bool) or git_tag.stdout_lines[0] != node_app_tag }}"
 
-- name: check app process is running
-  ansible.windows.win_shell: "Get-Process -Name {{ node_app_process }}"
-  register: app_process_running
+- name: check watchdog process is running
+  ansible.windows.win_shell: Get-Process -Name watchdog
+  register: watchdog_process_running
   ignore_errors: true
   no_log: true
-  changed_when: app_process_running.rc == 0
+  changed_when: watchdog_process_running.rc == 0
+  when: install_app | bool and node_watchdog | bool
 
-- name: stop running app processes
-  ansible.windows.win_shell: "Stop-Process -Force -Name {{ node_app_process }}; [void]"
-  when: app_process_running.rc == 0 and install_app | bool
+- name: stop running watchdog processes
+  ansible.windows.win_shell: Stop-Process -Force -Name watchdog; [void]
+  when: watchdog_process_running.rc == 0 and install_app | bool and node_watchdog | bool
+
+- name: check node process is running
+  ansible.windows.win_shell: Get-Process -Name node
+  register: node_process_running
+  ignore_errors: true
+  no_log: true
+  changed_when: node_process_running.rc == 0
+  when: install_app | bool
+
+- name: stop running node processes
+  ansible.windows.win_shell: Stop-Process -Force -Name node; [void]
+  when: node_process_running.rc == 0 and install_app | bool
 
 - name: remove old version
   ansible.windows.win_file:
